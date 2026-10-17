@@ -1,0 +1,16 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Build artifacts
+dist/
+*.dmg
+*.app
+
+# macOS noise
+.DS_Store
+Icon?
+
+# Xcode (if the project is opened as a package)
+xcuserdata/
+*.xcresult
