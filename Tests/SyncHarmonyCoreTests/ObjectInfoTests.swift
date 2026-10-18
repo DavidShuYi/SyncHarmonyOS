@@ -1,3 +1,12 @@
+//
+//  File:    ObjectInfoTests.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // ObjectInfoTests.swift — ObjectInfo dataset encode/decode and date handling.
 
 import XCTest

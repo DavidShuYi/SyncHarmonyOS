@@ -1,3 +1,12 @@
+//
+//  File:    PTPTransport.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // PTPTransport.swift — raw PTP container framing over USB bulk endpoints.
 //
 // MTP over USB does not use mass-storage BOT wrappers (CBW/CSW). Requests,

@@ -1,3 +1,12 @@
+//
+//  File:    DeviceSidebarView.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // DeviceSidebarView.swift — device picker and storage volumes.
 
 import SwiftUI

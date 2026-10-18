@@ -1,3 +1,12 @@
+/*
+ *  File:    usbshim.h
+ *  Project: SyncHarmonyOS
+ *  Author:  David Zhang
+ *  Version: 1.0.0
+ *  Date:    2026-10-18
+ *  License: MIT
+ */
+
 #ifndef USBSHIM_H
 #define USBSHIM_H
 #include <stdint.h>

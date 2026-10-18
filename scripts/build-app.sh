@@ -1,4 +1,13 @@
 #!/bin/bash
+#
+#  File:    build-app.sh
+#  Project: SyncHarmonyOS
+#  Author:  David Zhang
+#  Version: 1.0.0
+#  Date:    2026-10-18
+#  License: MIT
+#
+
 # build-app.sh — build SyncHarmonyOS.app from source.
 #
 # Usage:

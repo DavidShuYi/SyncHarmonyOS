@@ -1,3 +1,12 @@
+//
+//  File:    CacheMatchTests.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // CacheMatchTests.swift — Open With cache-hit detection and overwrite download.
 
 import XCTest

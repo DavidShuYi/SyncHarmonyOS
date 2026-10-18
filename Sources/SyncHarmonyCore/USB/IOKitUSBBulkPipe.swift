@@ -1,3 +1,12 @@
+//
+//  File:    IOKitUSBBulkPipe.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // IOKitUSBBulkPipe.swift — USBBulkPipe backed by the CUSBShim/IOKit user client.
 // One instance owns one exclusive USB interface claim.
 

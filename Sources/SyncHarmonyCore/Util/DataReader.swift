@@ -1,3 +1,12 @@
+//
+//  File:    DataReader.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // DataReader.swift — little-endian cursor over PTP/MTP datasets.
 // PTP datasets are little-endian per ISO 15740 / USB Still Image class spec.
 

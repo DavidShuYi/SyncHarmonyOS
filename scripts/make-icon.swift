@@ -1,3 +1,12 @@
+//
+//  File:    make-icon.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // make-icon.swift — renders the SyncHarmonyOS app icon with CoreGraphics.
 // Usage: swift make-icon.swift <output.iconset directory>
 // Draws: rounded-rect gradient background + two transfer arrows.

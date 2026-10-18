@@ -1,3 +1,12 @@
+/*
+ *  File:    usbshim.c
+ *  Project: SyncHarmonyOS
+ *  Author:  David Zhang
+ *  Version: 1.0.0
+ *  Date:    2026-10-18
+ *  License: MIT
+ */
+
 #include "usbshim.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>

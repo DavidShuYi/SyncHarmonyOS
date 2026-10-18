@@ -1,3 +1,12 @@
+//
+//  File:    SystemIcons.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // SystemIcons.swift — Finder-consistent icons for folders and file types.
 
 import AppKit

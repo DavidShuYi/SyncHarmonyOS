@@ -1,3 +1,12 @@
+//
+//  File:    MockPipeTests.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // MockPipeTests.swift — full-session tests against a simulated MTP device.
 // The mock device answers raw PTP containers exactly like the wire protocol
 // describes, so request framing, transaction IDs, streaming and response

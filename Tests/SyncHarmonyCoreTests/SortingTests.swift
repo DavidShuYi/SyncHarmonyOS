@@ -1,3 +1,12 @@
+//
+//  File:    SortingTests.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // SortingTests.swift — default sort order and sort keys.
 
 import XCTest

@@ -1,3 +1,12 @@
+//
+//  File:    AppModel.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // AppModel.swift — central observable state for the SwiftUI front end.
 // Bridges the blocking MTP core onto background queues and republishes
 // results on the main actor.

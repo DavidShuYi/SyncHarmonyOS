@@ -1,3 +1,12 @@
+//
+//  File:    OpenWithPickerView.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // OpenWithPickerView.swift — app picker for "打开方式" (Open With).
 // A normal SwiftUI list renders NSImage icons reliably, unlike native
 // context-menu submenus which drop NSImage/bitmap label icons.

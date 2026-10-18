@@ -1,3 +1,12 @@
+//
+//  File:    NativeContextMenuOverlay.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // NativeContextMenuOverlay.swift — native NSMenu right-click for the
 // preview grid. AppKit menu items carry real icons (NSMenuItem.image),
 // unlike SwiftUI context menus which drop NSImage/bitmap label icons.
@@ -47,18 +56,26 @@ struct NativeContextMenuOverlay: NSViewRepresentable {
         }
         menu.addItem(.separator())
 
-        coordinator.add(to: menu, title: "默认应用") {
+        // "打开方式"二级子菜单：默认应用 + 全部候选应用（带图标）。
+        let openMenu = NSMenu(title: "打开方式")
+        coordinator.add(to: openMenu, title: "默认应用") {
             files.forEach { model.openWith(entry: $0, appURL: nil) }
         }
         let candidates = model.candidateApps(for: files[0])
         if !candidates.isEmpty {
-            menu.addItem(.separator())
+            openMenu.addItem(.separator())
             for app in candidates {
-                coordinator.add(to: menu, title: app.name, image: app.icon) {
+                coordinator.add(to: openMenu, title: app.name, image: app.icon) {
                     files.forEach { model.openWith(entry: $0, appURL: app.url) }
                 }
             }
         }
+        let openItem = NSMenuItem(title: "打开方式", action: nil, keyEquivalent: "")
+        openItem.image = NSImage(systemSymbolName: "app.badge",
+                                 accessibilityDescription: "打开方式")
+        openItem.submenu = openMenu
+        menu.addItem(openItem)
+
         return (menu, coordinator)
     }
 

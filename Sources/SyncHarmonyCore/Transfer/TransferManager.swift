@@ -1,3 +1,12 @@
+//
+//  File:    TransferManager.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // TransferManager.swift — serial transfer queue with observable state for the GUI.
 // MTP transactions cannot run concurrently on one interface claim, so the
 // queue is deliberately serial per device.

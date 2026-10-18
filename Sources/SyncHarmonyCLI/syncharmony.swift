@@ -1,3 +1,12 @@
+//
+//  File:    syncharmony.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // syncharmony.swift — command-line front end. Useful for validating device
 // connectivity without launching the GUI.
 

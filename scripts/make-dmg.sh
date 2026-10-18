@@ -1,4 +1,13 @@
 #!/bin/bash
+#
+#  File:    make-dmg.sh
+#  Project: SyncHarmonyOS
+#  Author:  David Zhang
+#  Version: 1.0.0
+#  Date:    2026-10-18
+#  License: MIT
+#
+
 # make-dmg.sh — package dist/SyncHarmonyOS.app into a distributable DMG.
 #
 # Usage: scripts/make-dmg.sh

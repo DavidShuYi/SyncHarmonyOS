@@ -1,3 +1,12 @@
+//
+//  File:    MTPSession.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // MTPSession.swift — high-level MTP operations on top of PTPTransport.
 // Owns the session lifecycle: OpenSession → operations → CloseSession.
 

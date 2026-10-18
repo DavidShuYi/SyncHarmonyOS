@@ -1,3 +1,12 @@
+//
+//  File:    ContentView.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // ContentView.swift — main three-pane layout: devices / files / transfers.
 
 import SwiftUI

@@ -1,3 +1,12 @@
+//
+//  File:    USBBulkPipe.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // USBBulkPipe.swift — abstract bulk transport surface used by PTPTransport.
 // Splitting the protocol from the IOKit implementation keeps the MTP stack
 // unit-testable with an in-memory pipe.

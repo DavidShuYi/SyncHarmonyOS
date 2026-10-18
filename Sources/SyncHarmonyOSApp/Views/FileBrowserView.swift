@@ -1,3 +1,12 @@
+//
+//  File:    FileBrowserView.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // FileBrowserView.swift — file browsing with list & preview (thumbnail grid)
 // modes, Finder-consistent icons, and fully clickable breadcrumbs.
 
