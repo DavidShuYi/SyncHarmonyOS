@@ -91,6 +91,8 @@ struct SyncHarmonyCLI {
             try diagnose()
         case "diag2":
             try diagnoseFullSession()
+        case "thumb":
+            try fetchThumbnail(rest)
         default:
             FileHandle.standardError.write(Data("未知命令: \(command)\n".utf8))
             printUsage()
@@ -335,6 +337,29 @@ struct SyncHarmonyCLI {
         let info = try MTPDeviceInfo(reading: &reader)
         print("F. 完成: \(info.displayName)")
         pipe.close()
+    }
+
+    /// Fetch an object's embedded thumbnail for protocol verification.
+    static func fetchThumbnail(_ arguments: [String]) throws {
+        guard arguments.count >= 2 else {
+            throw MTPError.fileSystem("用法: syncharmony thumb <远程路径> <输出.jpg>")
+        }
+        let parsed = DevicePath.parse(arguments[0])
+        let output = URL(fileURLWithPath: arguments[1])
+        try withSession { session in
+            try withStorage(session: session, rawPath: parsed.path, alias: parsed.storageAlias) { storage, path in
+                let resolved = try MTPPathResolver.resolve(path, session: session, storageID: storage.storageID)
+                guard let object = resolved.object else {
+                    throw MTPError.fileSystem("路径不存在: \(path)")
+                }
+                if let data = try session.thumbnailData(handle: object.handle) {
+                    try data.write(to: output)
+                    print("缩略图: \(data.count) 字节 → \(output.path)")
+                } else {
+                    print("设备无内嵌缩略图: \(object.filename)")
+                }
+            }
+        }
     }
 
     static func withSession(_ body: (MTPSession) throws -> Void) throws {

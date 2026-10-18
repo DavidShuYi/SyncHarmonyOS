@@ -161,6 +161,24 @@ struct ContentView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup {
             Button {
+                model.goBack()
+            } label: {
+                Image(systemName: "chevron.left")
+            }
+            .disabled(!model.canGoBack)
+            .keyboardShortcut("[", modifiers: .command)
+            .help("后退（⌘[）")
+
+            Button {
+                model.goForward()
+            } label: {
+                Image(systemName: "chevron.right")
+            }
+            .disabled(!model.canGoForward)
+            .keyboardShortcut("]", modifiers: .command)
+            .help("前进（⌘]）")
+
+            Button {
                 model.navigateToRoot()
             } label: {
                 Image(systemName: "house")
@@ -177,6 +195,17 @@ struct ContentView: View {
             .help("刷新")
 
             Spacer()
+
+            Picker("查看方式", selection: $model.viewMode) {
+                Image(systemName: "list.bullet")
+                    .tag(BrowserViewMode.list)
+                Image(systemName: "square.grid.2x2")
+                    .tag(BrowserViewMode.preview)
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 88)
+            .disabled(model.connection != .connected)
+            .help("列表 / 预览")
 
             Button {
                 showDownloadPanel = true

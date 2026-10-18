@@ -227,6 +227,43 @@ public final class MTPSession {
         return response.params[1]
     }
 
+    /// Fetch the embedded thumbnail of an object (images only).
+    /// Returns JPEG bytes, or nil when the device keeps no thumbnail
+    /// (response 0x200D NoThumbnailInsideObject / 0x2010-family codes).
+    public func thumbnailData(handle: UInt32) throws -> Data? {
+        let response = try runTransaction(Operation.getThumbnail, name: "GetThumb",
+                                          params: [handle], hasData: true)
+        switch response.code {
+        case ResponseCode.ok:
+            break
+        case ResponseCode.noThumbnailInsideObject, ResponseCode.storeNotAvailable:
+            return nil
+        default:
+            throw MTPError.deviceResponse(code: response.code, operation: "GetThumb")
+        }
+        guard let data = response.data, data.count > 6 else { return nil }
+
+        let jpegSOI = Data([0xFF, 0xD8, 0xFF])
+        // Layout A (spec): thumbFormat u16 + thumbSize u32 + image bytes.
+        // Layout B (seen on Huawei/OpenHarmony): the raw JPEG with no header
+        // at all. Detect by SOI marker first, then fall back to the header.
+        let payload = data.dropFirst(6)
+        if payload.starts(with: jpegSOI) {
+            return Data(payload)
+        }
+        var reader = DataReader(data)
+        _ = try? reader.u16() // thumbFormat
+        let declaredSize = (try? reader.u32()) ?? 0
+        if declaredSize > 0, Int(declaredSize) <= payload.count {
+            return Data(payload.prefix(Int(declaredSize)))
+        }
+        // Last resort: locate the JPEG SOI anywhere in the payload.
+        if let soi = data.firstRange(of: jpegSOI) {
+            return Data(data[soi.lowerBound...])
+        }
+        return nil
+    }
+
     /// Delete a file or an empty folder.
     public func delete(handle: UInt32) throws {
         let response = try runTransaction(Operation.deleteObject, name: "DeleteObject",

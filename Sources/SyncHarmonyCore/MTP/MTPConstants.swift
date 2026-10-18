@@ -25,6 +25,7 @@ public enum Operation {
     public static let deleteObject: UInt16 = 0x100B
     public static let sendObjectInfo: UInt16 = 0x100C
     public static let sendObject: UInt16 = 0x100D
+    public static let getThumbnail: UInt16 = 0x100A
     // MTP extensions
     public static let getObjectPropValue: UInt16 = 0x9803
 }
@@ -154,6 +155,18 @@ public enum Handle {
     /// Parent handle meaning "root of a storage".
     public static let root: UInt32 = 0xFFFFFFFF
     public static let invalid: UInt32 = 0x00000000
+}
+
+public extension ObjectFormat {
+    /// 是否为可出缩略图的图片格式（预览模式用）。
+    static func isImage(_ code: UInt16) -> Bool {
+        switch code {
+        case jpeg, bmp, gif, png, tiff, heif:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 /// MTP object property codes (subset used by SyncHarmonyOS).

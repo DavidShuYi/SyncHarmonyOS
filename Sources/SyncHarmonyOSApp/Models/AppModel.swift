@@ -3,8 +3,15 @@
 // results on the main actor.
 
 import Foundation
+import AppKit
 import SyncHarmonyCore
 import Combine
+
+/// 浏览视图模式：列表 / 预览（图标网格）。
+public enum BrowserViewMode: String, CaseIterable {
+    case list
+    case preview
+}
 
 /// Top-level app state: device scanning, connection, browsing.
 @MainActor
@@ -25,8 +32,14 @@ public final class AppModel: ObservableObject {
     @Published public var selectedStorageID: UInt32?
     @Published public private(set) var entries: [MTPObjectInfo] = []
     @Published public var pathComponents: [MTPObjectInfo] = []
+    /// Forward history for the "next folder" toolbar action.
+    @Published public private(set) var forwardStack: [MTPObjectInfo] = []
     @Published public var errorMessage: String?
     @Published public private(set) var isLoadingEntries = false
+    /// 列表 / 预览 视图模式。
+    @Published public var viewMode: BrowserViewMode = .list
+    /// 预览模式下已加载的缩略图（句柄 → 图片）。
+    @Published public private(set) var thumbnails: [UInt32: NSImage] = [:]
 
     /// Selected rows (handles) for batch operations.
     @Published public var selectedHandles: Set<UInt32> = []
@@ -34,6 +47,9 @@ public final class AppModel: ObservableObject {
     private var session: MTPSession?
     private var sessionPipe: USBBulkPipe?
     private let workQueue = DispatchQueue(label: "io.syncharmonyos.appwork", qos: .userInitiated)
+    private let thumbnailQueue = DispatchQueue(label: "io.syncharmonyos.thumbs", qos: .userInitiated)
+    private var thumbnailLoading = Set<UInt32>()
+    private let thumbnailCache = NSCache<NSNumber, NSImage>()
     private var scanTimer: Timer?
     private let serialOps = DispatchQueue(label: "io.syncharmonyos.ops")
 
@@ -138,11 +154,38 @@ public final class AppModel: ObservableObject {
         connection = devices.isEmpty ? .noDevice : .scanning
     }
 
+    // MARK: - Navigation（前进 / 后退）
+
+    public var canGoBack: Bool { !pathComponents.isEmpty }
+    public var canGoForward: Bool { !forwardStack.isEmpty }
+
+    /// 后退一层（⌘[）。当前层级压入前进栈。
+    public func goBack() {
+        guard let last = pathComponents.popLast() else { return }
+        forwardStack.append(last)
+        thumbnails.removeAll()
+        reloadEntries()
+    }
+
+    /// 前进一层（⌘]），仅在后退过之后可用。
+    public func goForward() {
+        guard let next = forwardStack.popLast() else { return }
+        pathComponents.append(next)
+        thumbnails.removeAll()
+        reloadEntries()
+    }
+
+    private func clearForwardStack() {
+        if !forwardStack.isEmpty { forwardStack = [] }
+    }
+
     // MARK: - Browsing
 
     public func selectStorage(_ id: UInt32) {
         selectedStorageID = id
         pathComponents = []
+        clearForwardStack()
+        thumbnails.removeAll()
         reloadEntries()
     }
 
@@ -181,16 +224,22 @@ public final class AppModel: ObservableObject {
     public func openFolder(_ entry: MTPObjectInfo) {
         guard entry.isFolder else { return }
         pathComponents.append(entry)
+        clearForwardStack()
+        thumbnails.removeAll()
         reloadEntries()
     }
 
     public func navigateToPathComponent(at index: Int) {
         pathComponents = Array(pathComponents.prefix(index + 1))
+        clearForwardStack()
+        thumbnails.removeAll()
         reloadEntries()
     }
 
     public func navigateToRoot() {
         pathComponents = []
+        clearForwardStack()
+        thumbnails.removeAll()
         reloadEntries()
     }
 
@@ -285,5 +334,33 @@ public final class AppModel: ObservableObject {
     /// Called after transfers finish so listings refresh.
     public func transfersDidChange() {
         reloadEntries()
+    }
+
+    // MARK: - Thumbnails（预览模式缩略图）
+
+    /// 预览网格按需请求缩略图：命中缓存立即返回，否则后台经
+    /// GetThumb 拉取并解码。仅对图片格式发起请求。
+    public func requestThumbnail(for entry: MTPObjectInfo) {
+        guard viewMode == .preview, ObjectFormat.isImage(entry.objectFormat) else { return }
+        if thumbnails[entry.handle] != nil { return }
+        if let cached = thumbnailCache.object(forKey: NSNumber(value: entry.handle)) {
+            thumbnails[entry.handle] = cached
+            return
+        }
+        guard let session, !thumbnailLoading.contains(entry.handle) else { return }
+        thumbnailLoading.insert(entry.handle)
+        let handle = entry.handle
+        thumbnailQueue.async { [weak self] in
+            let data = (try? session.thumbnailData(handle: handle)) ?? nil
+            let decoded = data.flatMap(NSImage.init(data:))
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                thumbnailLoading.remove(handle)
+                if let decoded {
+                    thumbnailCache.setObject(decoded, forKey: NSNumber(value: handle))
+                    thumbnails[handle] = decoded
+                }
+            }
+        }
     }
 }
