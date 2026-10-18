@@ -4,7 +4,7 @@
 //  Author:  David Zhang
 //  Version: 1.0.0
 //  Date:    2026-10-18
-//  License: MIT
+//  License: AGPL-3.0-or-later
 //
 
 // MTPConstants.swift — public PTP/MTP protocol constants (ISO 15740, USB SI-1, MTP 1.x).

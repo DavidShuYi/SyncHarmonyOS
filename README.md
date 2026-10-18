@@ -105,6 +105,8 @@ scripts/make-dmg.sh         # 打包 dist/SyncHarmonyOS-1.0.0.dmg
 
 ## 许可
 
-MIT —— 见 [LICENSE](LICENSE)。
+[AGPL-3.0-or-later](LICENSE) —— GNU Affero 通用公共许可证第 3 版或（任选）更高版本。版权所有 (C) 2026 David Zhang。
+
+本项目为自由软件：你可以依据许可证条款自由使用、学习和修改。**重要**：AGPL 为强互惠（copyleft）许可证——任何基于本项目的修改版本（包括修改后仅提供网络服务而不直接分发）都必须以相同许可证向用户提供完整源代码。
 
 仅供学习研究和自己设备间合法传输文件使用。

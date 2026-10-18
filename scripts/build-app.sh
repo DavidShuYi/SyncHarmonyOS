@@ -5,7 +5,7 @@
 #  Author:  David Zhang
 #  Version: 1.0.0
 #  Date:    2026-10-18
-#  License: MIT
+#  License: AGPL-3.0-or-later
 #
 
 # build-app.sh — build SyncHarmonyOS.app from source.
@@ -79,7 +79,7 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
     <key>LSMinimumSystemVersion</key>           <string>13.0</string>
     <key>LSApplicationCategoryType</key>        <string>public.app-category.utilities</string>
     <key>NSHighResolutionCapable</key>          <true/>
-    <key>NSHumanReadableCopyright</key>         <string>MIT License — SyncHarmonyOS contributors</string>
+    <key>NSHumanReadableCopyright</key>         <string>Copyright (C) 2026 David Zhang — AGPL-3.0-or-later</string>
     <key>CFBundleDevelopmentRegion</key>        <string>zh-Hans</string>
 </dict>
 </plist>

@@ -4,7 +4,7 @@
 //  Author:  David Zhang
 //  Version: 1.0.0
 //  Date:    2026-10-18
-//  License: MIT
+//  License: AGPL-3.0-or-later
 //
 
 // AppModel.swift — central observable state for the SwiftUI front end.
