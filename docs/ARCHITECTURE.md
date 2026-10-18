@@ -85,8 +85,11 @@ type: 1=操作请求  2=数据  3=响应  4=事件
 
 ### 界面层
 
-- **App**（SwiftUI）：三栏布局 = 设备侧边栏 + 文件表格（Table，多选）+ 传输队列；工具栏（根目录/刷新/下载/上传/新建/删除）；拖拽上传；`fileImporter` 选择下载目录。
-- **CLI**（`syncharmony`）：`devices / info / storages / ls / pull / push / mkdir / rm / diag / diag2`，`MTPPathResolver` 把 `存储:路径` 解析成句柄，`SHO_TRACE=1` 输出线级日志。
+- **App**（SwiftUI）：三栏布局 = 设备侧边栏 + 文件表格（Table，多选）+ 传输队列；工具栏（后退/前进/根目录/刷新/视图切换/下载/上传/新建/删除）；拖拽上传；`fileImporter` 选择下载目录；两种视图模式（列表表格支持表头排序，预览网格按需加载设备端缩略图）。
+- **"打开方式"双实现**（`Sources/SyncHarmonyOSApp/Models/OpenWithMode.swift` 硬编码切换）：
+  - `.pickerSheet`（默认）：右键"打开方式…" → 选择器面板（SwiftUI 列表，NSImage 图标可靠渲染，支持搜索）。
+  - `.nativeMenu`：预览网格右键直接弹原生 NSMenu（AppKit `NSMenuItem.image` 原生图标，观感同 Finder 右键）。SwiftUI 上下文菜单不渲染真实图片图标，故该模式用一层 AppKit 覆盖视图（`NativeContextMenuOverlay`）拦截右键、按 hitTest 区分左右键。
+- **CLI**（`syncharmony`）：`devices / info / storages / ls / pull / push / mkdir / rm / thumb / diag / diag2`，`MTPPathResolver` 把 `存储:路径` 解析成句柄，`SHO_TRACE=1` 输出线级日志。
 
 ## 线程模型
 

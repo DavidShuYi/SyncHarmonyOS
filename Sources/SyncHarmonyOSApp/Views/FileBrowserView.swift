@@ -142,45 +142,65 @@ struct FileBrowserView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 132), spacing: 10)],
                       spacing: 10) {
                 ForEach(model.sortedEntries) { entry in
-                    PreviewCell(entry: entry,
-                                thumbnail: model.thumbnails[entry.handle],
-                                isSelected: model.selectedHandles.contains(entry.handle))
-                        .contentShape(Rectangle())
-                        // 按下即选中（DragGesture onChanged 立即触发），
-                        // 双击在抬起时手动检测——避免单击/双击消歧的
-                        // 系统等待延迟。
-                        .gesture(DragGesture(minimumDistance: 0)
-                            .onChanged { _ in
-                                model.pressSelectBegin(entry: entry)
-                            }
-                            .onEnded { _ in
-                                model.pressSelectEnd(entry: entry)
-                            })
-                        .onAppear {
-                            model.requestThumbnail(for: entry)
-                        }
-                        .contextMenu {
-                            Button("刷新") { model.reloadEntries() }
-                            if !entry.isFolder {
-                                Button("下载到 Mac…") {
-                                    model.selectedHandles = [entry.handle]
-                                    NotificationCenter.default.post(name: .shoDownloadSelected, object: nil)
-                                }
-                            }
-                            // 右键的条目若在选区内则对整个选区生效。
-                            let scope: [MTPObjectInfo] =
-                                model.selectedHandles.contains(entry.handle)
-                                ? model.entriesFor(handles: model.selectedHandles)
-                                : [entry]
-                            Button {
-                                model.showOpenWithPicker(for: scope)
-                            } label: {
-                                Label("打开方式…", systemImage: "app.badge")
-                            }
-                        }
+                    gridCell(for: entry)
                 }
             }
             .padding(12)
+        }
+    }
+
+    /// 单个预览单元；右键呈现方式由 OpenWithConfig 硬编码切换：
+    /// - .pickerSheet：SwiftUI contextMenu → "打开方式…" → 选择器面板
+    /// - .nativeMenu ：AppKit 覆盖层拦截右键 → 原生 NSMenu（带图标）
+    private func gridCell(for entry: MTPObjectInfo) -> some View {
+        let base = PreviewCell(entry: entry,
+                               thumbnail: model.thumbnails[entry.handle],
+                               isSelected: model.selectedHandles.contains(entry.handle))
+            .contentShape(Rectangle())
+            // 按下即选中（DragGesture onChanged 立即触发），
+            // 双击在抬起时手动检测——避免单击/双击消歧的
+            // 系统等待延迟。
+            .gesture(DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    model.pressSelectBegin(entry: entry)
+                }
+                .onEnded { _ in
+                    model.pressSelectEnd(entry: entry)
+                })
+            .onAppear {
+                model.requestThumbnail(for: entry)
+            }
+
+        switch OpenWithConfig.presentation {
+        case .pickerSheet:
+            return AnyView(base.contextMenu {
+                Button("刷新") { model.reloadEntries() }
+                if !entry.isFolder {
+                    Button("下载到 Mac…") {
+                        model.selectedHandles = [entry.handle]
+                        NotificationCenter.default.post(name: .shoDownloadSelected, object: nil)
+                    }
+                }
+                // 右键的条目若在选区内则对整个选区生效。
+                let scope: [MTPObjectInfo] =
+                    model.selectedHandles.contains(entry.handle)
+                    ? model.entriesFor(handles: model.selectedHandles)
+                    : [entry]
+                Button {
+                    model.showOpenWithPicker(for: scope)
+                } label: {
+                    Label("打开方式…", systemImage: "app.badge")
+                }
+            })
+        case .nativeMenu:
+            return AnyView(base.overlay(
+                NativeContextMenuOverlay(model: model, scopeProvider: {
+                    if model.selectedHandles.contains(entry.handle) {
+                        return model.entriesFor(handles: model.selectedHandles)
+                    }
+                    return [entry]
+                })
+            ))
         }
     }
 
