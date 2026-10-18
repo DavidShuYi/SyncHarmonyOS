@@ -92,17 +92,33 @@ struct FileBrowserView: View {
             }
             .width(60)
         }
-        .contextMenu(forSelectionType: MTPObjectInfo.self) { selection in
+        // The registered selection type must match the Table's selection
+        // value type (Set<UInt32> of object handles); primaryAction then
+        // receives the double-clicked row's IDs.
+        .contextMenu(forSelectionType: UInt32.self) { selectedHandles in
             Button("刷新") { model.reloadEntries() }
-            if !selection.isEmpty {
+            if !selectedHandles.isEmpty {
                 Button("下载所选…") {
                     NotificationCenter.default.post(name: .shoDownloadSelected, object: nil)
                 }
             }
-        } primaryAction: { selection in
-            if let entry = selection.first {
+        } primaryAction: { selectedHandles in
+            if let handle = selectedHandles.first,
+               let entry = model.entries.first(where: { $0.handle == handle }) {
                 model.openFolder(entry)
             }
+        }
+        .background {
+            // Return opens the selected folder, matching Finder conventions.
+            Button("打开") {
+                if let handle = model.selectedHandles.first,
+                   let entry = model.entries.first(where: { $0.handle == handle }) {
+                    model.openFolder(entry)
+                }
+            }
+            .keyboardShortcut(.return, modifiers: [])
+            .opacity(0)
+            .accessibilityHidden(true)
         }
     }
 }

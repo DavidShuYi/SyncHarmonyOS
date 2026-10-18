@@ -117,14 +117,25 @@ struct ContentView: View {
 
     private var emptyState: some View {
         VStack(spacing: 14) {
-            Image(systemName: "iphone.and.arrow.forward")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("连接你的设备")
-                .font(.title3.bold())
-            Text("用 USB 数据线连接鸿蒙 / 安卓手机，\n并在手机上选择「传输文件」模式。")
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+            if model.devices.isEmpty {
+                Image(systemName: "iphone.and.arrow.forward")
+                    .font(.system(size: 48))
+                    .foregroundStyle(.secondary)
+                Text("连接你的设备")
+                    .font(.title3.bold())
+                Text("用 USB 数据线连接鸿蒙 / 安卓手机，\n并在手机上选择「传输文件」模式。")
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            } else {
+                Image(systemName: "sidebar.left")
+                    .font(.system(size: 48))
+                    .foregroundStyle(.secondary)
+                Text("选择左侧的设备开始浏览")
+                    .font(.title3.bold())
+                Text("已检测到 \(model.devices.count) 台设备，点击侧边栏中的设备名称即可连接。")
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
             if model.connection == .noDevice {
                 Button("重新扫描") { model.scanDevices() }
                     .buttonStyle(.borderedProminent)

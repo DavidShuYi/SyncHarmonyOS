@@ -57,6 +57,9 @@ public final class AppModel: ObservableObject {
     public func scanDevices() {
         workQueue.async { [weak self] in
             let devices = USBDeviceScanner.scanDevices()
+            if ProcessInfo.processInfo.environment["SHO_TRACE"] == "1" {
+                FileHandle.standardError.write(Data("[scan] \(devices.count) device(s): \(devices.map { $0.displayName })\n".utf8))
+            }
             DispatchQueue.main.async { [weak self] in
                 self?.applyScannedDevices(devices)
             }
