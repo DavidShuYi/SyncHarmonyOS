@@ -75,8 +75,8 @@ type: 1=操作请求  2=数据  3=响应  4=事件
 
 ### SyncHarmonyCore.MTP（会话与模型）
 
-- `MTPSession`：OpenSession / GetDeviceInfo / GetStorageIDs / GetStorageInfo / GetObjectHandles / GetObjectInfo / GetObject（流式下载 + 进度）/ SendObjectInfo + SendObject（流式上传）/ DeleteObject / CreateFolder / GetObjectPropValue（64 位大小探测）。
-- `MTPModels`：`MTPDeviceInfo` / `MTPStorage` / `MTPObjectInfo` 数据集解析与编码。**双布局解析**：PTP 的容量字段是 u32，MTP 扩展把它加宽为 u64——先按 MTP 解析（带合理性校验），失败回退 PTP 布局。
+- `MTPSession`：OpenSession / GetDeviceInfo / GetStorageIDs / GetStorageInfo / GetObjectHandles / GetObjectInfo / GetObject（流式下载 + 进度）/ SendObjectInfo + SendObject（流式上传）/ DeleteObject / CreateFolder / GetObjectPropValue（64 位大小探测）/ GetThumb（图片与视频缩略图，布局自动探测：标准 6 字节头或华为的裸 JPEG）。
+- `MTPModels`：`MTPDeviceInfo` / `MTPStorage` / `MTPObjectInfo` 数据集解析与编码。**双布局解析**：PTP 的容量字段是 u32，MTP 扩展把它加宽为 u64——先按 MTP 解析（带合理性校验），失败回退 PTP 布局。`sortName` / `sortDate` / `size` 为排序键（默认修改时间倒序）。
 - `MTPError`：把设备响应码、USB 错误、本地文件问题统一成用户可读的中文错误。
 
 ### SyncHarmonyCore.Transfer（队列）

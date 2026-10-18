@@ -62,10 +62,10 @@ struct FileBrowserView: View {
         }
     }
 
-    // MARK: - 列表模式
+    // MARK: - 列表模式（表头可排序，默认时间倒序）
 
     private var listTable: some View {
-        Table(model.entries, selection: $model.selectedHandles) {
+        Table(model.sortedEntries, selection: $model.selectedHandles, sortOrder: $model.sortOrder) {
             TableColumn("") { entry in
                 Image(nsImage: entry.systemIcon)
                     .resizable()
@@ -73,19 +73,19 @@ struct FileBrowserView: View {
             }
             .width(30)
 
-            TableColumn("名称") { entry in
+            TableColumn("名称", value: \.sortName) { entry in
                 Text(entry.filename)
                     .fontWeight(entry.isFolder ? .medium : .regular)
             }
 
-            TableColumn("大小") { entry in
+            TableColumn("大小", value: \.size) { entry in
                 Text(entry.isFolder ? "—" : ByteCount.format(entry.size))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
             .width(min: 80, ideal: 100)
 
-            TableColumn("修改时间") { entry in
+            TableColumn("修改时间", value: \.sortDate) { entry in
                 if let date = entry.modificationDate {
                     Text(date, style: .date)
                         .foregroundStyle(.secondary)
@@ -129,13 +129,13 @@ struct FileBrowserView: View {
         }
     }
 
-    // MARK: - 预览模式（缩略图网格）
+    // MARK: - 预览模式（缩略图网格，支持多选）
 
     private var iconGrid: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 132), spacing: 10)],
                       spacing: 10) {
-                ForEach(model.entries) { entry in
+                ForEach(model.sortedEntries) { entry in
                     PreviewCell(entry: entry,
                                 thumbnail: model.thumbnails[entry.handle],
                                 isSelected: model.selectedHandles.contains(entry.handle))
@@ -144,7 +144,7 @@ struct FileBrowserView: View {
                             if entry.isFolder { model.openFolder(entry) }
                         }
                         .onTapGesture {
-                            model.selectedHandles = [entry.handle]
+                            model.tapSelect(entry: entry)
                         }
                         .onAppear {
                             model.requestThumbnail(for: entry)
@@ -177,7 +177,8 @@ struct FileBrowserView: View {
     }
 }
 
-/// 预览网格单元：文件夹/非图片显示系统图标，图片显示设备端缩略图。
+/// 预览网格单元：文件夹/非图片显示系统图标，图片与视频显示
+/// 设备端缩略图（视频叠加播放角标）。
 struct PreviewCell: View {
     let entry: MTPObjectInfo
     let thumbnail: NSImage?
@@ -207,6 +208,15 @@ struct PreviewCell: View {
                 }
             }
             .frame(width: 112, height: 112)
+            .overlay(alignment: .bottomTrailing) {
+                if entry.isVideoFile && thumbnail != nil {
+                    Image(systemName: "play.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(.white, .black.opacity(0.55))
+                        .padding(4)
+                        .shadow(radius: 2)
+                }
+            }
             Text(entry.filename)
                 .font(.caption)
                 .lineLimit(2)

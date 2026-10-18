@@ -211,6 +211,13 @@ public struct MTPObjectInfo: Equatable, Hashable, Identifiable {
         return formatter.date(from: s)
     }
 
+    /// 不可空的排序键（KeyPathComparator 需要 Comparable）：
+    /// 没有修改时间的对象按最早处理。
+    public var sortDate: Date { modificationDate ?? .distantPast }
+
+    /// 大小写不敏感的名称排序键（Finder 风格）。
+    public var sortName: String { filename.lowercased() }
+
     /// Inverse of parsePTPDate, used when building datasets for upload.
     public static func formatPTPDate(_ date: Date) -> String {
         let formatter = DateFormatter()

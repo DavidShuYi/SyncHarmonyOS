@@ -92,6 +92,7 @@ USB 上的一切都是**裸 PTP 容器**——没有 mass-storage BOT 的 CBW/CS
 | GetObject | 0x1009 | [handle] → 文件字节流 |
 | SendObjectInfo | 0x100C | [storageID, parent] + ObjectInfo 数据集 → [storage, **新句柄**] |
 | SendObject | 0x100D | 文件字节流 → [句柄]（华为实测有时不返回句柄） |
+| GetThumb | 0x100A | [handle] → 缩略图数据集（图片、视频均可） |
 | DeleteObject | 0x100B | [handle, 0] |
 | GetObjectPropValue | 0x9803 | [handle, 0xDC04] → ObjectSize（u64，突破 ObjectInfo 的 4 GB 上限） |
 
@@ -105,6 +106,14 @@ MTP 扩展:   type u16 | fs u16 | access u16 | maxCapacity u64 | free u64 | free
 ```
 
 实测华为平板返回 **u64 布局**（len=50）。解析器先按 MTP 解析（容量 < 1 PB 合理性校验），失败回退 PTP 布局，两种设备都兼容。
+
+### GetThumb（缩略图）实测
+
+规范规定数据阶段为 `ThumbFormat u16 + ThumbCompressedSize u32 + 图像字节`。实测华为/OpenHarmony 设备**不带 6 字节头**，直接返回裸 JPEG。解析顺序：SOI 标记探测 → 标准头解析 → 全量搜索 SOI，三种布局通吃。
+
+实测样例：
+- 图片（截图 283 KB）→ 42 KB JPEG 350×758
+- 视频（IMG_*.mp4）→ 42 KB JPEG 350×466（首帧预览），可直接作为视频预览图
 
 ### ObjectInfo（上传时也要构造）
 

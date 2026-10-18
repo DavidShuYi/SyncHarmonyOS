@@ -38,8 +38,16 @@ public final class AppModel: ObservableObject {
     @Published public private(set) var isLoadingEntries = false
     /// 列表 / 预览 视图模式。
     @Published public var viewMode: BrowserViewMode = .list
+    /// 排序状态（表头点击驱动）。默认按修改时间倒序。
+    @Published public var sortOrder: [KeyPathComparator<MTPObjectInfo>] = [
+        KeyPathComparator(\MTPObjectInfo.sortDate, order: .reverse)
+    ]
+    /// 当前排序后的列表（列表模式与预览模式共用）。
+    public var sortedEntries: [MTPObjectInfo] { entries.sorted(using: sortOrder) }
     /// 预览模式下已加载的缩略图（句柄 → 图片）。
     @Published public private(set) var thumbnails: [UInt32: NSImage] = [:]
+    /// 范围多选（Shift 点击）的锚点。
+    @Published private(set) var selectionAnchor: UInt32?
 
     /// Selected rows (handles) for batch operations.
     @Published public var selectedHandles: Set<UInt32> = []
@@ -336,12 +344,36 @@ public final class AppModel: ObservableObject {
         reloadEntries()
     }
 
+    // MARK: - Selection（多选：单击 / ⌘ 切换 / ⇧ 范围）
+
+    /// 预览模式的点击选择逻辑（列表模式的 Table 自带 ⌘/⇧ 多选）。
+    public func tapSelect(entry: MTPObjectInfo) {
+        let flags = NSEvent.modifierFlags
+        if flags.contains(.command) {
+            if selectedHandles.contains(entry.handle) {
+                selectedHandles.remove(entry.handle)
+            } else {
+                selectedHandles.insert(entry.handle)
+            }
+            selectionAnchor = entry.handle
+        } else if flags.contains(.shift),
+                  let anchor = selectionAnchor ?? selectedHandles.first,
+                  let from = entries.firstIndex(where: { $0.handle == anchor }),
+                  let to = entries.firstIndex(where: { $0.handle == entry.handle }) {
+            let range = min(from, to)...max(from, to)
+            selectedHandles = Set(entries[range].map(\.handle))
+        } else {
+            selectedHandles = [entry.handle]
+            selectionAnchor = entry.handle
+        }
+    }
+
     // MARK: - Thumbnails（预览模式缩略图）
 
     /// 预览网格按需请求缩略图：命中缓存立即返回，否则后台经
-    /// GetThumb 拉取并解码。仅对图片格式发起请求。
+    /// GetThumb 拉取并解码。图片与视频均可（视频返回预览帧）。
     public func requestThumbnail(for entry: MTPObjectInfo) {
-        guard viewMode == .preview, ObjectFormat.isImage(entry.objectFormat) else { return }
+        guard viewMode == .preview, entry.canPreviewThumbnail else { return }
         if thumbnails[entry.handle] != nil { return }
         if let cached = thumbnailCache.object(forKey: NSNumber(value: entry.handle)) {
             thumbnails[entry.handle] = cached

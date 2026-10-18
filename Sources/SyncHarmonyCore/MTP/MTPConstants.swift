@@ -167,6 +167,16 @@ public extension ObjectFormat {
             return false
         }
     }
+
+    /// 常见视频格式的对象格式码。
+    static func isVideo(_ code: UInt16) -> Bool {
+        switch code {
+        case avi, mpeg, threeGP, mp4, windowsMediaVideo:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 /// MTP object property codes (subset used by SyncHarmonyOS).
