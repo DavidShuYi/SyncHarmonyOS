@@ -93,6 +93,7 @@ scripts/make-dmg.sh         # 打包 dist/SyncHarmonyOS-1.0.0.dmg
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) —— 分层架构与模块职责
 - [docs/PROTOCOL.md](docs/PROTOCOL.md) —— MTP over USB 线级协议详解（含实测抓包数据）
 - [docs/BUILD.md](docs/BUILD.md) —— 开发、编译、打包、安装步骤
+- [docs/VERSIONING.md](docs/VERSIONING.md) —— 版本规范（SemVer）与打包/发布流程
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) —— 常见问题与排障
 
 ## 技术要点

@@ -75,6 +75,20 @@ SyncHarmonyOSApp (SwiftUI)   SyncHarmonyCLI
 - `swift build --product` 一次只能指定一个产品，需要分别构建。
 - shell 脚本 shebang 必须保持第一行。
 
+## 版本与打包规范（详见 docs/VERSIONING.md）
+
+- 版本号遵循 **SemVer 2.0.0**（`MAJOR.MINOR.PATCH`）：破坏兼容（含提升最低 macOS 版本、
+  CLI 语义变更、缓存格式不兼容）→ MAJOR；向后兼容新功能 → MINOR；问题修复 → PATCH。
+  有一位递增右侧归零，版本号只进不退，已发布的版本号永不复用。
+- 版本字符串落点共 **5 处**（`build-app.sh` / `make-dmg.sh` / 源文件声明头 /
+  `SettingsView.swift` 关于页 / `README.md`），bump 时一次改齐；
+  以 App `CFBundleShortVersionString` 为单一事实来源。
+- 源文件声明头的 Version = 该文件**最后被改动的版本**：bump 时只更新本次修改/新增的文件，
+  未改动的文件保持旧版本号不动，禁止顺手统一全仓版本头。
+- 打包只走脚本：产物固定为 `dist/SyncHarmonyOS.app` 与 `dist/SyncHarmonyOS-<version>.dmg`；
+  release 必须 arm64+x86_64 通用二进制，`dist/` 不入库。
+- 发布必打 annotated tag `v<version>`，tag 与 DMG 一一对应，已推送的 tag 永不移动/删除。
+
 ## 测试策略
 
 - **协议层测试全部走 `MockMTPPipe`**（脚本化应答的模拟 MTP 设备），覆盖完整会话生命周期、
@@ -95,7 +109,8 @@ SyncHarmonyOSApp (SwiftUI)   SyncHarmonyCLI
 - 注释英文、UI 文案中文；错误信息面向用户（中文 + 可操作的解决建议）。
 - 所有源文件带统一声明头（`File/Project/Author: David Zhang/Version/Date/License: AGPL-3.0-or-later`），
   生成脚本幂等，勿手写重复。
-- 版本号：源码头与 App `CFBundleShortVersionString` 保持一致（当前 1.0.0）。
+- 版本号：改动/新增的源文件，其声明头 Version 更新为发布版本（当前 1.0.0）；
+  未改动的文件保持原版本号不动。bump 规则见上方「版本与打包规范」与 `docs/VERSIONING.md`。
 - UI 层 `@MainActor`；阻塞的 MTP 调用一律派发到后台队列，结果回主线程。
 - 新增协议行为优先在 `MockMTPPipe` 上补测试用例，再接真机验证。
 
@@ -115,4 +130,5 @@ SyncHarmonyOSApp (SwiftUI)   SyncHarmonyCLI
 - `docs/PROTOCOL.md` — MTP over USB 线级协议 + 实测数据 + 踩坑清单
 - `docs/ARCHITECTURE.md` — 分层架构与模块职责
 - `docs/BUILD.md` — 小白级构建/打包步骤
+- `docs/VERSIONING.md` — 版本规范与打包/发布流程（SemVer、落点同步、Release Checklist）
 - `docs/TROUBLESHOOTING.md` — 用户侧故障排查 + 缓存清理策略
