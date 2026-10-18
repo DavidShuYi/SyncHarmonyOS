@@ -20,6 +20,8 @@ public final class TransferTask: Identifiable, ObservableObject {
     @Published public var state: TransferState = .queued
     @Published public var bytesDone: UInt64 = 0
     public let bytesTotal: UInt64
+    /// 下载成功完成后的回调（主线程调用），用于"打开方式"等后处理。
+    public var onFinish: (() -> Void)?
 
     public enum Kind: Equatable {
         case download(fileName: String, destination: URL)
@@ -58,9 +60,11 @@ public final class TransferManager: ObservableObject {
     }
 
     public func enqueueDownload(handle: UInt32, name: String, size: UInt64,
-                                destination: URL) {
+                                destination: URL,
+                                onFinish: (() -> Void)? = nil) {
         let task = TransferTask(kind: .download(fileName: name, destination: destination),
                                 bytesTotal: size)
+        task.onFinish = onFinish
         append(task)
         queue.async { [self] in
             run(task) { session in
@@ -130,6 +134,9 @@ public final class TransferManager: ObservableObject {
         DispatchQueue.main.async { [self] in
             task.state = state
             isBusy = tasks.contains { $0.state == .running || $0.state == .queued }
+            if state == .finished {
+                task.onFinish?()
+            }
         }
     }
 }

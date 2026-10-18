@@ -5,6 +5,7 @@
 import Foundation
 import AppKit
 import QuartzCore
+import UniformTypeIdentifiers
 import SyncHarmonyCore
 import Combine
 
@@ -12,6 +13,14 @@ import Combine
 public enum BrowserViewMode: String, CaseIterable {
     case list
     case preview
+}
+
+/// 可打开某文件类型的候选应用（"打开方式"子菜单）。
+public struct AppCandidate: Identifiable {
+    public let id = UUID()
+    public let name: String
+    public let icon: NSImage
+    public let url: URL
 }
 
 /// Top-level app state: device scanning, connection, browsing.
@@ -338,6 +347,66 @@ public final class AppModel: ObservableObject {
                 }
             }
         }
+    }
+
+    // MARK: - Open With（打开方式：下载到缓存后交给系统/指定应用）
+
+    /// "打开方式"下载缓存目录。
+    private static let openCacheDirectory: URL = {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        return caches.appendingPathComponent("SyncHarmonyOS/opens", isDirectory: true)
+    }()
+
+    /// 按扩展名推导内容类型，列出系统中可打开该类型的应用。
+    public func candidateApps(for entry: MTPObjectInfo) -> [AppCandidate] {
+        let ext = (entry.filename as NSString).pathExtension
+        let type = UTType(filenameExtension: ext) ?? .data
+        let urls = NSWorkspace.shared.urlsForApplications(toOpen: type)
+        var seen = Set<String>()
+        var candidates: [AppCandidate] = []
+        for url in urls {
+            let path = url.path
+            guard seen.insert(path).inserted else { continue }
+            seen.insert(path)
+            let name = FileManager.default.displayName(atPath: path)
+            candidates.append(AppCandidate(name: name,
+                                           icon: NSWorkspace.shared.icon(forFile: path),
+                                           url: url))
+        }
+        return candidates.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    /// 用默认应用或指定应用打开设备上的文件：
+    /// 先排队下载到缓存目录，完成后由系统交给对应应用。
+    public func openWith(entry: MTPObjectInfo, appURL: URL?) {
+        guard !entry.isFolder else { return }
+        let destination = Self.openCacheDirectory
+            .appendingPathComponent("\(entry.handle)_\(entry.filename)")
+        transfers.enqueueDownload(handle: entry.handle,
+                                  name: entry.filename,
+                                  size: entry.size,
+                                  destination: destination) { [weak self] in
+            self?.launchOpen(fileURL: destination, appURL: appURL)
+        }
+    }
+
+    private func launchOpen(fileURL: URL, appURL: URL?) {
+        try? FileManager.default.createDirectory(at: Self.openCacheDirectory,
+                                                 withIntermediateDirectories: true)
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
+        if let appURL {
+            NSWorkspace.shared.open([fileURL],
+                                    withApplicationAt: appURL,
+                                    configuration: NSWorkspace.OpenConfiguration(),
+                                    completionHandler: nil)
+        } else {
+            NSWorkspace.shared.open(fileURL)
+        }
+    }
+
+    /// 右键菜单用：把句柄集合换成本地条目（按当前排序）。
+    public func entriesFor(handles: Set<UInt32>) -> [MTPObjectInfo] {
+        sortedEntries.filter { handles.contains($0.handle) }
     }
 
     /// Called after transfers finish so listings refresh.
