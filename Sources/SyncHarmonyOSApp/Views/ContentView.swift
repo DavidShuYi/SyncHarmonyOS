@@ -75,6 +75,19 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .shoDownloadSelected)) { _ in
             showDownloadPanel = true
         }
+        .sheet(isPresented: Binding(
+            get: { model.openWithEntries != nil },
+            set: { if !$0 { model.cancelOpenWithPicker() } }
+        )) {
+            if let files = model.openWithEntries {
+                OpenWithPickerView(files: files,
+                                   candidates: model.candidateApps(for: files[0]),
+                                   onPick: { appURL in
+                                       model.confirmOpenWith(appURL: appURL, files: files)
+                                   },
+                                   onCancel: { model.cancelOpenWithPicker() })
+            }
+        }
         .onAppear {
             observeTransfers()
         }

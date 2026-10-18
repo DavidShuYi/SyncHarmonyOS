@@ -117,7 +117,11 @@ struct FileBrowserView: View {
                 Button("下载所选…") {
                     NotificationCenter.default.post(name: .shoDownloadSelected, object: nil)
                 }
-                openWithMenu(for: selected)
+                Button {
+                    model.showOpenWithPicker(for: selected)
+                } label: {
+                    Label("打开方式…", systemImage: "app.badge")
+                }
             }
         } primaryAction: { selectedHandles in
             openByHandles(selectedHandles)
@@ -168,7 +172,11 @@ struct FileBrowserView: View {
                                 model.selectedHandles.contains(entry.handle)
                                 ? model.entriesFor(handles: model.selectedHandles)
                                 : [entry]
-                            openWithMenu(for: scope)
+                            Button {
+                                model.showOpenWithPicker(for: scope)
+                            } label: {
+                                Label("打开方式…", systemImage: "app.badge")
+                            }
                         }
                 }
             }
@@ -177,42 +185,6 @@ struct FileBrowserView: View {
     }
 
     // MARK: - plumbing
-
-    /// "打开方式"子菜单：默认应用 + 系统中可打开该类型的应用列表。
-    /// 对文件夹不显示；多选时对选区内所有文件生效。
-    @ViewBuilder
-    private func openWithMenu(for entries: [MTPObjectInfo]) -> some View {
-        let files = entries.filter { !$0.isFolder }
-        Menu {
-            if files.isEmpty {
-                Button("（未选中文件）") {}
-                    .disabled(true)
-            } else {
-                Button {
-                    files.forEach { model.openWith(entry: $0, appURL: nil) }
-                } label: {
-                    Label("默认应用", systemImage: "arrow.up.forward.app")
-                }
-                let candidates = model.candidateApps(for: files[0])
-                if !candidates.isEmpty {
-                    Divider()
-                    ForEach(candidates) { app in
-                        Button {
-                            files.forEach { model.openWith(entry: $0, appURL: app.url) }
-                        } label: {
-                            Label {
-                                Text(app.name)
-                            } icon: {
-                                app.menuImage
-                            }
-                        }
-                    }
-                }
-            }
-        } label: {
-            Label("打开方式", systemImage: "app.badge")
-        }
-    }
 
     private func openByHandles(_ handles: Set<UInt32>) {
         guard let handle = handles.first,

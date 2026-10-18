@@ -16,12 +16,11 @@ public enum BrowserViewMode: String, CaseIterable {
     case preview
 }
 
-/// 可打开某文件类型的候选应用（"打开方式"子菜单）。
+/// 可打开某文件类型的候选应用（"打开方式"选择器）。
 public struct AppCandidate: Identifiable {
     public let id = UUID()
     public let name: String
-    /// 菜单可显示的位图图标（SwiftUI 菜单不渲染 NSImage）。
-    public let menuImage: Image
+    public let icon: NSImage
     public let url: URL
 }
 
@@ -370,7 +369,7 @@ public final class AppModel: ObservableObject {
             seen.insert(path)
             let name = FileManager.default.displayName(atPath: path)
             candidates.append(AppCandidate(name: name,
-                                           menuImage: NSWorkspace.shared.icon(forFile: path).menuImage(),
+                                           icon: NSWorkspace.shared.icon(forFile: path),
                                            url: url))
         }
         return candidates.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -407,6 +406,28 @@ public final class AppModel: ObservableObject {
     /// 右键菜单用：把句柄集合换成本地条目（按当前排序）。
     public func entriesFor(handles: Set<UInt32>) -> [MTPObjectInfo] {
         sortedEntries.filter { handles.contains($0.handle) }
+    }
+
+    // MARK: - 打开方式选择器（面板状态）
+
+    /// 非 nil 时显示应用选择器面板（待打开的文件列表）。
+    @Published public var openWithEntries: [MTPObjectInfo]?
+
+    /// 右键"打开方式…"：弹出应用选择器。
+    public func showOpenWithPicker(for entries: [MTPObjectInfo]) {
+        let files = entries.filter { !$0.isFolder }
+        guard !files.isEmpty else { return }
+        openWithEntries = files
+    }
+
+    /// 在选择器中选定应用：批量排队下载并打开。
+    public func confirmOpenWith(appURL: URL?, files: [MTPObjectInfo]) {
+        files.forEach { openWith(entry: $0, appURL: appURL) }
+        openWithEntries = nil
+    }
+
+    public func cancelOpenWithPicker() {
+        openWithEntries = nil
     }
 
     /// Called after transfers finish so listings refresh.
