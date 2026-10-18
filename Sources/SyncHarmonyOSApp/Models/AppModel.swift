@@ -4,6 +4,7 @@
 
 import Foundation
 import AppKit
+import QuartzCore
 import SyncHarmonyCore
 import Combine
 
@@ -347,6 +348,7 @@ public final class AppModel: ObservableObject {
     // MARK: - Selection（多选：单击 / ⌘ 切换 / ⇧ 范围）
 
     /// 预览模式的点击选择逻辑（列表模式的 Table 自带 ⌘/⇧ 多选）。
+    /// Shift 范围按当前排序后的可见顺序计算。
     public func tapSelect(entry: MTPObjectInfo) {
         let flags = NSEvent.modifierFlags
         if flags.contains(.command) {
@@ -357,14 +359,43 @@ public final class AppModel: ObservableObject {
             }
             selectionAnchor = entry.handle
         } else if flags.contains(.shift),
-                  let anchor = selectionAnchor ?? selectedHandles.first,
-                  let from = entries.firstIndex(where: { $0.handle == anchor }),
-                  let to = entries.firstIndex(where: { $0.handle == entry.handle }) {
+                  let anchor = selectionAnchor ?? selectedHandles.first {
+            let visible = sortedEntries
+            guard let from = visible.firstIndex(where: { $0.handle == anchor }),
+                  let to = visible.firstIndex(where: { $0.handle == entry.handle }) else { return }
             let range = min(from, to)...max(from, to)
-            selectedHandles = Set(entries[range].map(\.handle))
+            selectedHandles = Set(visible[range].map(\.handle))
         } else {
             selectedHandles = [entry.handle]
             selectionAnchor = entry.handle
+        }
+    }
+
+    // MARK: - 按下即选中（消除单击/双击消歧延迟）
+
+    /// 拖拽手势的一次按压进行中标志：onChanged 可能连发，去重。
+    private var pressInProgress = false
+    /// 上一次按压（用于双击检测）。
+    private var lastActivation: (handle: UInt32?, time: Double) = (nil, 0)
+
+    /// 预览网格：鼠标**按下**立即选中（对齐 Finder 的按下即选中，
+    /// 不等待双击消歧）。
+    public func pressSelectBegin(entry: MTPObjectInfo) {
+        guard !pressInProgress else { return }
+        pressInProgress = true
+        tapSelect(entry: entry)
+    }
+
+    /// 鼠标抬起：同一单元两次按压且间隔在系统双击时间内 → 打开文件夹。
+    public func pressSelectEnd(entry: MTPObjectInfo) {
+        pressInProgress = false
+        let now = CACurrentMediaTime()
+        if lastActivation.handle == entry.handle,
+           now - lastActivation.time < NSEvent.doubleClickInterval {
+            lastActivation = (nil, 0)
+            if entry.isFolder { openFolder(entry) }
+        } else {
+            lastActivation = (entry.handle, now)
         }
     }
 

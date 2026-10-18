@@ -140,12 +140,16 @@ struct FileBrowserView: View {
                                 thumbnail: model.thumbnails[entry.handle],
                                 isSelected: model.selectedHandles.contains(entry.handle))
                         .contentShape(Rectangle())
-                        .onTapGesture(count: 2) {
-                            if entry.isFolder { model.openFolder(entry) }
-                        }
-                        .onTapGesture {
-                            model.tapSelect(entry: entry)
-                        }
+                        // 按下即选中（DragGesture onChanged 立即触发），
+                        // 双击在抬起时手动检测——避免单击/双击消歧的
+                        // 系统等待延迟。
+                        .gesture(DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                model.pressSelectBegin(entry: entry)
+                            }
+                            .onEnded { _ in
+                                model.pressSelectEnd(entry: entry)
+                            })
                         .onAppear {
                             model.requestThumbnail(for: entry)
                         }
