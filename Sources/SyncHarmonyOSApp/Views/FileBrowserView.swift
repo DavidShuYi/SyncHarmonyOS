@@ -203,7 +203,7 @@ struct FileBrowserView: View {
                             Label {
                                 Text(app.name)
                             } icon: {
-                                Image(nsImage: app.icon)
+                                app.menuImage
                             }
                         }
                     }

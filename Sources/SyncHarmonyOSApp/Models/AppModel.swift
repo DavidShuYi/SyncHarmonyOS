@@ -4,6 +4,7 @@
 
 import Foundation
 import AppKit
+import SwiftUI
 import QuartzCore
 import UniformTypeIdentifiers
 import SyncHarmonyCore
@@ -19,7 +20,8 @@ public enum BrowserViewMode: String, CaseIterable {
 public struct AppCandidate: Identifiable {
     public let id = UUID()
     public let name: String
-    public let icon: NSImage
+    /// 菜单可显示的位图图标（SwiftUI 菜单不渲染 NSImage）。
+    public let menuImage: Image
     public let url: URL
 }
 
@@ -368,7 +370,7 @@ public final class AppModel: ObservableObject {
             seen.insert(path)
             let name = FileManager.default.displayName(atPath: path)
             candidates.append(AppCandidate(name: name,
-                                           icon: NSWorkspace.shared.icon(forFile: path),
+                                           menuImage: NSWorkspace.shared.icon(forFile: path).menuImage(),
                                            url: url))
         }
         return candidates.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
