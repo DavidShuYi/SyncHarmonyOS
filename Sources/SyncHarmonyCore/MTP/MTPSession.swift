@@ -126,12 +126,17 @@ public final class MTPSession {
     // MARK: - Transfer
 
     /// Download an object (file) to a local URL with progress reporting.
+    /// `overwrite` 允许覆盖已存在的目标（"打开方式"缓存重下场景）。
     public func download(handle: UInt32, totalSize: UInt64,
                          to destination: URL,
+                         overwrite: Bool = false,
                          progress: ProgressHandler? = nil) throws {
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: destination.path) {
-            throw MTPError.fileSystem("目标文件已存在: \(destination.lastPathComponent)")
+            guard overwrite else {
+                throw MTPError.fileSystem("目标文件已存在: \(destination.lastPathComponent)")
+            }
+            try? fileManager.removeItem(at: destination)
         }
         // Create the empty target file (and parents) so the handle can open.
         let directory = destination.deletingLastPathComponent()

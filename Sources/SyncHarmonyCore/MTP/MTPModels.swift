@@ -227,6 +227,18 @@ public struct MTPObjectInfo: Equatable, Hashable, Identifiable {
         return formatter.string(from: date)
     }
 
+    /// 判断本地缓存副本是否与设备对象一致（大小 + 修改时间）。
+    /// 用于"打开方式"缓存命中：一致则跳过重复下载直接打开。
+    /// 超过 4 GB 时 32 位大小字段不可信（0xFFFFFFFF），只按时间判断。
+    public func matchesLocalCopy(at url: URL) -> Bool {
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+              let cachedSize = attrs[.size] as? UInt64,
+              let cachedDate = attrs[.modificationDate] as? Date,
+              let entryDate = modificationDate else { return false }
+        if compressedSize != 0xFFFF_FFFF, cachedSize != size { return false }
+        return abs(cachedDate.timeIntervalSince(entryDate)) < 60
+    }
+
     /// Encode an ObjectInfo dataset (upload / new folder).
     public static func encode(_ info: MTPObjectInfo) -> Data {
         var w = DataWriter()

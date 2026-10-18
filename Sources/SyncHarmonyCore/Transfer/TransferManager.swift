@@ -61,6 +61,7 @@ public final class TransferManager: ObservableObject {
 
     public func enqueueDownload(handle: UInt32, name: String, size: UInt64,
                                 destination: URL,
+                                overwrite: Bool = false,
                                 onFinish: (() -> Void)? = nil) {
         let task = TransferTask(kind: .download(fileName: name, destination: destination),
                                 bytesTotal: size)
@@ -68,7 +69,8 @@ public final class TransferManager: ObservableObject {
         append(task)
         queue.async { [self] in
             run(task) { session in
-                try session.download(handle: handle, totalSize: size, to: destination) { done, _ in
+                try session.download(handle: handle, totalSize: size, to: destination,
+                                     overwrite: overwrite) { done, _ in
                     DispatchQueue.main.async { task.bytesDone = done }
                 }
             }

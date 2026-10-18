@@ -376,16 +376,29 @@ public final class AppModel: ObservableObject {
     }
 
     /// 用默认应用或指定应用打开设备上的文件：
-    /// 先排队下载到缓存目录，完成后由系统交给对应应用。
+    /// 缓存命中（本地副本大小/修改时间与设备一致）→ 直接打开；
+    /// 未命中 → 排队覆盖下载到缓存目录，完成后交给对应应用，
+    /// 并把副本修改时间对齐设备时间供下次命中判定。
     public func openWith(entry: MTPObjectInfo, appURL: URL?) {
         guard !entry.isFolder else { return }
         let destination = Self.openCacheDirectory
             .appendingPathComponent("\(entry.handle)_\(entry.filename)")
+
+        if entry.matchesLocalCopy(at: destination) {
+            launchOpen(fileURL: destination, appURL: appURL)
+            return
+        }
         transfers.enqueueDownload(handle: entry.handle,
                                   name: entry.filename,
                                   size: entry.size,
-                                  destination: destination) { [weak self] in
-            self?.launchOpen(fileURL: destination, appURL: appURL)
+                                  destination: destination,
+                                  overwrite: true) { [weak self] in
+            guard let self else { return }
+            if let deviceDate = entry.modificationDate {
+                try? FileManager.default.setAttributes(
+                    [.modificationDate: deviceDate], ofItemAtPath: destination.path)
+            }
+            self.launchOpen(fileURL: destination, appURL: appURL)
         }
     }
 
