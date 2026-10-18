@@ -32,7 +32,7 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 Text("常见问题").font(.headline)
-                Text("• 手机连接后看不到设备？请在手机通知栏选择「传输文件」。\n• 提示设备被占用？退出 Harmonica / Android File Transfer 等其他 MTP 应用。\n• 大文件传输较慢？MTP 协议单线程传输，速度取决于设备。")
+                Text("• 手机连接后看不到设备？请在手机通知栏选择「传输文件」。\n• 提示设备被占用？退出 Android File Transfer、MacDroid 等其他 MTP 应用。\n• 大文件传输较慢？MTP 协议单线程传输，速度取决于设备。")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                 Spacer()

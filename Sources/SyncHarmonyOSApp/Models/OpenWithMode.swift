@@ -1,3 +1,12 @@
+//
+//  File:    OpenWithMode.swift
+//  Project: SyncHarmonyOS
+//  Author:  David Zhang
+//  Version: 1.0.0
+//  Date:    2026-10-18
+//  License: MIT
+//
+
 // OpenWithMode.swift — "打开方式"呈现方式的编译期切换开关。
 //
 // ★ 修改 OpenWithConfig.presentation 后重新编译即可切换效果 ★
@@ -23,5 +32,5 @@ enum OpenWithPresentation {
 
 enum OpenWithConfig {
     /// ★ 切换点：.pickerSheet / .nativeMenu
-    static let presentation: OpenWithPresentation = .pickerSheet
+    static let presentation: OpenWithPresentation = .nativeMenu
 }

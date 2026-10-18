@@ -13,11 +13,11 @@
    ```
    有输出说明枚举正常；没输出说明 USB 层面就没有 MTP 接口。
 
-### 「设备被占用：请先退出 Harmonica…」
+### 「设备被占用：请先退出其他 MTP 应用…」
 
 USB 的 MTP 接口同一时间只允许**一个**应用独占。退出其他 MTP 软件：
 
-- Harmonica / Android File Transfer / MacDroid / 手动挂载的访达窗口
+- Android File Transfer / MacDroid / 手动挂载的访达窗口
 - 它们常驻后台的话，在 Dock 图标右键退出，或活动监视器搜索进程
 
 ### 「设备停止响应 / 传输超时」
@@ -88,4 +88,4 @@ SHO_TRACE=1 $CLI ls / # ⑤ 全程线级日志（每个容器一行）
 - 不支持 Wi-Fi / SMB 传输（仅 USB MTP）
 - 中断端点事件（UDT）未读取——设备主动推送的事件（如对象被手机端删除）不会实时推送，界面手动刷新即可
 - 下载不支持断点续传、不支持取消进行中的传输（队列里取消的是未开始的任务）
-- 未做 Finder 扩展（Harmonica 的 "Driver" 形态），文件管理在 App 内完成
+- 未做 Finder 扩展（如部分商业 MTP 工具提供的形态），文件管理在 App 内完成

@@ -35,7 +35,7 @@ public enum MTPError: Error, CustomStringConvertible, LocalizedError {
         case let .io(message):
             return "USB 通信失败: \(message)"
         case .deviceBusy:
-            return "设备被占用：请先退出 Harmonica、Android File Transfer 等其他 MTP 应用后重试"
+            return "设备被占用：请先退出 Android File Transfer、MacDroid 等其他 MTP 应用后重试"
         case .noDevice:
             return "未发现 MTP 设备：请用数据线连接手机，并在手机上选择「传输文件」模式"
         case .disconnected:

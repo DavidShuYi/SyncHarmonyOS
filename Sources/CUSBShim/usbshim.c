@@ -276,7 +276,7 @@ int shimOpenByEntryID(uint64_t entryID, void **outContext, char *errBuf, size_t 
     if (kr != kIOReturnSuccess) {
         if (errBuf) {
             if (kr == kIOReturnExclusiveAccess)
-                snprintf(errBuf, errLen, "device busy: another app (e.g. Harmonica/Android File Transfer) owns this device");
+                snprintf(errBuf, errLen, "device busy: another app (e.g. Android File Transfer) owns this device");
             else
                 snprintf(errBuf, errLen, "USBInterfaceOpen: 0x%08x", kr);
         }

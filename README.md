@@ -43,7 +43,7 @@ SyncHarmonyOS 让你在 macOS 上直接浏览、上传、下载鸿蒙（HarmonyO
 4. 用数据线连接鸿蒙/安卓设备，在**手机通知栏**把 USB 用途切换为「**传输文件**」
 5. 应用侧边栏出现设备后点击连接
 
-> ⚠️ 如果提示「设备被占用」，请退出 Harmonica、Android File Transfer 等其他 MTP 软件——USB MTP 接口同一时间只允许一个应用独占。
+> ⚠️ 如果提示「设备被占用」，请退出其他 MTP 软件（如 Android File Transfer、MacDroid）——USB MTP 接口同一时间只允许一个应用独占。
 
 ## 使用
 
@@ -102,9 +102,6 @@ scripts/make-dmg.sh         # 打包 dist/SyncHarmonyOS-1.0.0.dmg
 - **架构**：`SyncHarmonyCore`（协议栈，平台无关核心）+ SwiftUI App + CLI 三端复用
 - **测试**：模拟 MTP 设备的完整会话测试（请求帧、事务 ID、流式传输、错误路径），14 个用例
 
-## 与 Harmonica 的关系
-
-本项目受 [Harmonica](https://apps.apple.com/)（Mac App Store 收费 MTP 客户端）启发。通过 REA 对其做了黑盒结构分析（确认其使用 libmtp/libusb + SwiftUI + File Provider 扩展），但 **SyncHarmonyOS 未复制其任何代码或资源**——协议栈按公开的 MTP/PTP 规范全新实现（clean-room），UI 为原创设计。
 
 ## 许可
 
