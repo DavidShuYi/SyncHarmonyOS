@@ -77,6 +77,7 @@ public final class AppModel: ObservableObject {
 
     public init() {
         startPeriodicScan()
+        OpenCacheJanitor.cleanAsync()
     }
 
     // MARK: - Device scanning
@@ -351,11 +352,8 @@ public final class AppModel: ObservableObject {
 
     // MARK: - Open With（打开方式：下载到缓存后交给系统/指定应用）
 
-    /// "打开方式"下载缓存目录。
-    private static let openCacheDirectory: URL = {
-        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        return caches.appendingPathComponent("SyncHarmonyOS/opens", isDirectory: true)
-    }()
+    /// "打开方式"下载缓存目录（由 OpenCacheJanitor 管理，启动时自动清理）。
+    private static let openCacheDirectory = OpenCacheJanitor.directory
 
     /// 按扩展名推导内容类型，列出系统中可打开该类型的应用。
     public func candidateApps(for entry: MTPObjectInfo) -> [AppCandidate] {
