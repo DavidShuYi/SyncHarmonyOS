@@ -21,9 +21,13 @@ func renderIcon(size: CGFloat) -> CGImage {
 
     let s = size / 1024 // design-space scale factor (drawn for 1024 px)
 
-    // macOS 11+ squircle background with blue→teal gradient.
-    let rect = CGRect(x: 0, y: 0, width: size, height: size)
-    let corner = 232 * s
+    // Apple macOS icon grid: the squircle body is 824×824 centered on the
+    // 1024×1024 canvas (≈80.5%), corner radius ≈185. Drawing edge-to-edge
+    // makes the icon look one size larger than every other app in the Dock.
+    let bodySide: CGFloat = 824 * s
+    let inset = (size - bodySide) / 2
+    let rect = CGRect(x: inset, y: inset, width: bodySide, height: bodySide)
+    let corner = 185 * s
     let path = CGPath(roundedRect: rect, cornerWidth: corner, cornerHeight: corner, transform: nil)
     context.addPath(path)
     context.clip()
